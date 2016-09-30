@@ -5,6 +5,7 @@ from .fields import (
     FloatRangeField, HStoreField, IntegerRangeField, JSONField,
     SearchVectorField,
 )
+import uuid
 
 
 class Tag(object):
@@ -109,6 +110,18 @@ class Line(PostgreSQLModel):
 
     def __str__(self):
         return self.dialogue or ''
+
+
+class Asset(PostgreSQLModel):
+    key = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        primary_key=True,
+    )
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.key.hex
 
 
 class RangesModel(PostgreSQLModel):

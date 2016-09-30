@@ -9,7 +9,7 @@ from ..fields import (
     SearchVectorField,
 )
 from ..models import TagField
-
+import uuid
 
 class Migration(migrations.Migration):
 
@@ -215,6 +215,18 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
+        migrations.CreateModel(
+            name='Asset',
+            fields=[
+                ('key', models.UUIDField(primary_key=True,
+                                         default=uuid.uuid4, editable=False)),
+                ('name', models.CharField(max_length=255)),
+            ],
+            options={
+                'required_db_vendor': 'postgresql'
+            },
+            bases=(models.Model,),
+        )
     ]
 
     pg_94_operations = [

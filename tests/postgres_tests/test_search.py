@@ -12,7 +12,7 @@ from django.db.models import F
 from django.test import modify_settings
 
 from . import PostgreSQLTestCase
-from .models import Character, Line, Scene
+from .models import Character, Line, Scene, Asset
 
 
 class GrailTestData(object):
@@ -77,6 +77,14 @@ class GrailTestData(object):
             character=guards,
             dialogue='Oh. Un cadeau. Oui oui.',
             dialogue_config='french',
+        )
+        cls.sword = Asset.objects.create(
+            key='7c29f1b3-81e4-4700-9d0b-9b2e7b73a59b',
+            name="Sir Robin's Giant Sword of Bravery"
+        )
+        cls.beak = Asset.objects.create(
+            key='2e691ffc-b195-4300-8faa-d24985099204',
+            name="Golden Beak of continious quacking"
         )
 
 
@@ -178,6 +186,24 @@ class MultipleFieldsTest(GrailTestData, PostgreSQLTestCase):
             search=SearchVector('scene__setting', 'dialogue', config=F('dialogue_config')),
         ).filter(search='cadeaux')
         self.assertSequenceEqual(searched, [self.french])
+
+    def test_fallback_value_two_terms(self):
+        searched = Line.objects.annotate(
+            search=SearchVector(
+                'scene__setting', 'dialogue', fallback_value='Brave Sir Robin'
+            ),
+        ).filter(search='heart forest')
+        self.assertSequenceEqual(searched, [self.verse2])
+
+    def test_fallback_value(self):
+        searched = Asset.objects.annotate(
+            search=SearchVector(
+                'key',
+                'name',
+                fallback_value='00000000-0000-4000-8f00-000000000000'
+            )
+        ).filter(search='Giant')
+        self.assertSequenceEqual(searched, [self.sword])
 
 
 @modify_settings(INSTALLED_APPS={'append': 'django.contrib.postgres'})

@@ -1,6 +1,6 @@
-from django.db.models import Field, FloatField
+from django.db.models import Field, FloatField, TextField
 from django.db.models.expressions import CombinedExpression, Func, Value
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Cast, Coalesce
 from django.db.models.lookups import Lookup
 
 
@@ -49,17 +49,22 @@ class SearchVector(SearchVectorCombinable, Func):
     arg_joiner = " || ' ' || "
     _output_field = SearchVectorField()
     config = None
+    fallback_value = ''
 
     def __init__(self, *expressions, **extra):
         super(SearchVector, self).__init__(*expressions, **extra)
-        self.source_expressions = [
-            Coalesce(expression, Value('')) for expression in self.source_expressions
-        ]
         self.config = self.extra.get('config', self.config)
         weight = self.extra.get('weight')
+        self.fallback_value = extra.get('fallback_value', self.fallback_value)
         if weight is not None and not hasattr(weight, 'resolve_expression'):
             weight = Value(weight)
         self.weight = weight
+        self.source_expressions = [
+            Coalesce(
+                Cast(expression, output_field=TextField()),
+                Value(self.fallback_value)
+            ) for expression in self.source_expressions
+        ]
 
     def resolve_expression(self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False):
         resolved = super(SearchVector, self).resolve_expression(query, allow_joins, reuse, summarize, for_save)

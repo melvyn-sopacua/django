@@ -1270,3 +1270,17 @@ class SquashMigrationsTests(MigrationTestBase):
             )
             with self.assertRaisesMessage(CommandError, msg):
                 call_command("squashmigrations", "migrations", "0003", "0002", interactive=False, verbosity=0)
+
+    def test_squashmigrations_final_name(self):
+        """
+        squashmigrations --final-name should set name correctly
+        """
+        with self.temporary_migration_module(module="migrations.test_migrations") as migration_dir:
+            call_command(
+                "squashmigrations", "migrations", "0001", "0002",
+                final_name='release_001', interactive=False, verbosity=0,
+            )
+            squashed_migration_file = os.path.join(
+                migration_dir, "0001_release_001.py"
+            )
+            self.assertTrue(os.path.exists(squashed_migration_file))

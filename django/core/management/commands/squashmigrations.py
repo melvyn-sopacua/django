@@ -34,7 +34,7 @@ class Command(BaseCommand):
             help='Tells Django to NOT prompt the user for input of any kind.',
         )
         parser.add_argument(
-            '--finalname', dest='final_name', default=None, nargs=1,
+            '--finalname', dest='final_name', default=None,
             help='Use this name for the resulting migration',
         )
 
@@ -161,15 +161,15 @@ class Command(BaseCommand):
         })
         if start_migration_name:
             if final_name:
-                prefix, discard = start_migration.name.split('_', 1)
-                name = '{:s}_{:s}'.format(prefix, final_name)
+                prefix, discard = start_migration.name.split("_", 1)
+                name = "{:s}_{:s}".format(prefix, final_name)
             else:
                 name = "{:s}_squashed_{:s}".format(
                     start_migration.name, migration.name
                 )
             new_migration = subclass(name, app_label)
         else:
-            end = final_name or 'squashed_{:s}'.format(migration.name)
+            end = final_name or "squashed_{:s}".format(migration.name)
             name = "0001_{:s}".format(end)
             new_migration = subclass(name, app_label)
             new_migration.initial = True

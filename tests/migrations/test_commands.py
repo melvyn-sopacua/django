@@ -1284,6 +1284,12 @@ class SquashMigrationsTests(MigrationTestBase):
                 migration_dir, "0001_release_001.py"
             )
             self.assertTrue(os.path.exists(squashed_migration_file))
+        with self.temporary_migration_module(module="migrations.test_migrations") as migration_dir:
             call_command(
-                "squashmigrations", ""
+                "squashmigrations", "migrations", "0001",
+                squashed_name="release_001", interactive=False, verbosity=0,
             )
+            squashed_migration_file = os.path.join(
+                migration_dir, "0001_release_001.py"
+            )
+            self.assertTrue(os.path.exists(squashed_migration_file))

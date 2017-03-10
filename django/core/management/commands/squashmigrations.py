@@ -34,7 +34,7 @@ class Command(BaseCommand):
             help='Tells Django to NOT prompt the user for input of any kind.',
         )
         parser.add_argument(
-            '--finalname', dest='final_name', default=None,
+            '--squashed-name', dest='squashed_name', default=None,
             help='Use this name for the resulting migration',
         )
 
@@ -46,7 +46,7 @@ class Command(BaseCommand):
         start_migration_name = options['start_migration_name']
         migration_name = options['migration_name']
         no_optimize = options['no_optimize']
-        final_name = options['final_name']
+        squashed_name = options['squashed_name']
 
         # Load the current graph state, check the app and migration they asked for exists
         loader = MigrationLoader(connections[DEFAULT_DB_ALIAS])
@@ -160,16 +160,16 @@ class Command(BaseCommand):
             "replaces": replaces,
         })
         if start_migration_name:
-            if final_name:
+            if squashed_name:
                 prefix, discard = start_migration.name.split("_", 1)
-                name = "{:s}_{:s}".format(prefix, final_name)
+                name = "{:s}_{:s}".format(prefix, squashed_name)
             else:
                 name = "{:s}_squashed_{:s}".format(
                     start_migration.name, migration.name
                 )
             new_migration = subclass(name, app_label)
         else:
-            end = final_name or "squashed_{:s}".format(migration.name)
+            end = squashed_name or "squashed_{:s}".format(migration.name)
             name = "0001_{:s}".format(end)
             new_migration = subclass(name, app_label)
             new_migration.initial = True

@@ -310,6 +310,19 @@ class LayerMapTest(TestCase):
         self.assertEqual(City.objects.count(), 1)
         self.assertEqual(City.objects.all()[0].name, "Zürich")
 
+    def test_null_geom_with_unique(self):
+        """ Unique with a null column should not throw exception """
+        State.objects.bulk_create([
+            State(name='Colorado'), State(name='Hawaii'), State(name='Texas')
+        ])
+        hw = State.objects.get(name='Hawaii')
+        hu = County.objects.create(name='Honolulu', state=hw)
+        lm = LayerMapping(County, co_shp, co_mapping, transform=False, unique='name')
+        lm.save(silent=True, strict=True)
+        hu.refresh_from_db()
+        self.assertIsNotNone(hu.mpoly)
+        self.assertEqual(hu.mpoly.ogr.num_coords, 449)
+
 
 class OtherRouter:
     def db_for_read(self, model, **hints):
